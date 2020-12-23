@@ -22,18 +22,17 @@ The ETL script does the following:
 ####  2. ML Pipeline Preparation
 The ML script does the following:
 
-- Load messages and categories datasets
-- Merge and clean the data
-- Save the cleaned data in a SQLite database
+- Loads data from the SQLite database
+- Splits the dataset into training and test sets
+- Builds a text processing and machine learning pipeline
+- Trains and tunes a model using GridSearchCV
+- Outputs results on the test set
+- Exports the final model as a pickle file
 
 ####  3. The Web App
-The ML script does the following:
+The Web App is a condensed application of the Pipeline preparation work using flask, html, css and javascript
 
-- Load messages and categories datasets
-- Merge and clean the data
-- Save the cleaned data in a SQLite database
-
-## Run Locally
+## Run The Web App Locally
 
 ### Instructions:
 1. Run the following commands in the project's root directory to set up your database and model.
