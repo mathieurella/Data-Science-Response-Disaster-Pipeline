@@ -6,6 +6,7 @@ from sqlalchemy import create_engine
 
 
 def load_data(messages_filepath, categories_filepath):
+    ''' Load dataset & merge them on ID '''
     messages = pd.read_csv(messages_filepath)
     categories = pd.read_csv(categories_filepath)
     df = pd.merge(messages, categories, how="left", on="id")
@@ -14,22 +15,25 @@ def load_data(messages_filepath, categories_filepath):
 
 
 def clean_data(df):
-    # create a dataframe of the 36 individual category columns
+    '''1/ Create a dataframe of the 36 individual category columns
+       2/ Select the first row of the categories dataframe
+       3/ Extract a list of new column names for categories & strip the last 2 characters
+       4/ Rename the categories columns
+       5/ Loop on each columns values to retrieve the the last character of the string
+       6/ Loop to convert values column from string to numeric
+       7/ Fit to get boolean
+       8/ delete categories column from df
+       9/ Concatenate message & categories
+       10/ Drop duplicates of df      
+    '''
     categories = df.categories.str.split(";",expand=True,)
-    # select the first row of the categories dataframe
     row = categories.iloc[0]
-    # use this row to extract a list of new column names for categories.
-    # one way is to apply a lambda function that takes everything 
-    # up to the second to last character of each string with slicing
     category_colnames = row.str.split('-').str[0]
-    # rename the columns of `categories`
     categories.columns = category_colnames
     for column in categories:
-        # set each value to be the last character of the string
         categories[column] = categories[column].str.strip().str[-1]
-
-        # convert column from string to numeric
-        categories[column] =  pd.to_numeric(categories[column], errors='coerce')
+        categories[column] =  pd.to_numeric(categories[column], errors='coerce')    
+    categories.related.replace(2,1,inplace=True) 
     del df['categories']
     df = pd.concat([df, categories], axis=1)
     df.drop_duplicates(inplace=True)
@@ -37,8 +41,9 @@ def clean_data(df):
     return df
 
 def save_data(df, database_filename):
+    ''' Save into a Database '''
     engine = create_engine('sqlite:///'+ database_filename)
-    df.to_sql('Disaster-Response', engine, index=False)
+    df.to_sql('Disaster-Response', engine, index=False, if_exists = 'replace')
 
 def main():
     if len(sys.argv) == 4:
