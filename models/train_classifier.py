@@ -23,6 +23,10 @@ from sklearn.multiclass import OneVsRestClassifier
 
 
 def load_data(database_filepath):
+    ''' 1/ Read Disaster-Response table
+        2/ Create X & Y
+        3/ Retrieve category name from Y columns          
+    '''
     engine = create_engine('sqlite:///'+database_filepath)
     df = pd.read_sql_table('Disaster-Response', con=engine)
     X = df['message']
@@ -32,13 +36,13 @@ def load_data(database_filepath):
 
 
 def tokenize(text):
-       # normalize case and remove punctuation
+    '''1/ Normalize case and remove punctuation
+       2/ tokenize text
+       3/ Lemmatize and remove stop words
+    '''
+
     text = re.sub(r"[^a-zA-Z0-9]", " ", text.lower())
-    
-    # tokenize text
     tokens = word_tokenize(text)
-    
-    # lemmatize and remove stop words
     stop_words = stopwords.words("english")
     lemmatizer = WordNetLemmatizer()
     tokens = [lemmatizer.lemmatize(word) for word in tokens if word not in stop_words]
@@ -47,6 +51,7 @@ def tokenize(text):
 
 
 def build_model():
+    ''' building the model '''
     pipeline  = Pipeline([
         ('vect', CountVectorizer(tokenizer=tokenize)),
         ('tfidf', TfidfTransformer()),
@@ -61,6 +66,7 @@ def build_model():
     return cv
 
 def evaluate_model(model, X_test, Y_test, category_names):
+    ''' evaluate the model through classification report showing the : precision, recall, f1-score & support '''
     Y_pred = model.predict(X_test)
 
     for i in range(36):
@@ -69,6 +75,7 @@ def evaluate_model(model, X_test, Y_test, category_names):
 
 
 def save_model(model, model_filepath):
+     ''' Save the model as a pickle file '''
      pickle.dump(model, open(model_filepath, 'wb'))
 
 
